@@ -1,0 +1,48 @@
+server:
+  port: 8051
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+      routes:
+        - id: reclamationModule
+          uri: http://localhost:8040/
+          predicates:
+            - Path=/reclamations/**
+        - id: eventModule
+          uri: http://localhost:8090/
+          predicates:
+            - Path=/events/**
+        - id: forumModule
+          uri: http://localhost:8080/
+          predicates:
+            - Path=/forums/**,/posts/**
+        - id: userModule
+          uri: http://localhost:8060/
+          predicates:
+            - Path=/api/**
+        - id: clubModule
+          uri: http://localhost:9000/
+          predicates:
+            - Path=/clubs/**
+        - id: courseModule
+          uri: http://localhost:9090/
+          predicates:
+            - Path=/courses/**

@@ -1,0 +1,304 @@
+version: "3.8"
+services:
+  eureka-server:
+    build:
+      context: ./Eureka-server/
+      dockerfile: Dockerfile
+    restart: always
+    container_name: eureka-container
+    image: eureka-image
+    ports:
+      - "8761:8761"
+    networks:
+      - bored-network
+  userDB:
+    container_name: userDB-container
+    image: mongo
+    restart: always
+    networks:
+      - bored-network
+    volumes:
+      - userVolume:/data/db
+    ports: 
+      - "27017:27017"
+  eventDB:
+    container_name: eventDB-container
+    restart: always
+    image: mysql
+    networks:
+      - bored-network
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=event_data_base
+    volumes:
+      - eventVolume:/var/lib/mysql
+    ports:
+      - "3306:3306"
+  reclamationDB:
+    container_name: reclamationDB-container
+    image: mysql
+    networks:
+      - bored-network
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=reclamation_data_base
+    volumes:
+      - reclamationVolume:/var/lib/mysql
+    restart: always
+    ports:
+      - "3307:3306"
+  fourmDB:
+    container_name: fourmDB-container
+    image: postgres
+    restart: always
+    networks:
+      - bored-network
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: fourmdatabase
+      POSTGRES_USER: postgres
+    volumes: 
+     - forumVolume:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  clubDB:
+    container_name: clubDB-container
+    image: postgres
+    restart: always
+    networks:
+      - bored-network
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: club-service
+      POSTGRES_USER: postgres
+    volumes:
+      - clubVolume:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+  nodeDB:
+    container_name: nodeDB-container
+    image: mongo
+    restart: always
+    networks:
+      - bored-network
+    volumes:
+      - nodeVolume:/data/db
+    ports:
+      - "27018:27017"
+  courseDB:
+    container_name: courseDB-container
+    image: mongo
+    restart: always
+    networks:
+      - bored-network
+    volumes:
+      - courseVolume:/data/db
+    ports:
+      - "27019:27017"
+ 
+  forum-service:
+    build:
+      context: ./forum-service
+      dockerfile: Dockerfile
+    container_name: forum-container
+    image: forum-image
+    restart: always
+    networks:
+      - bored-network
+    depends_on:
+      - fourmDB
+      - eureka-server
+    environment:
+      - eureka.client.service-url.defaultZone=http://eureka-server:8761/eureka
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.leaseRenewalIntervalInSeconds=10
+      - eureka.instance.leaseExpirationDurationInSeconds=30
+      - spring.datasource.url=jdbc:postgresql://fourmDB:5432/fourmdatabase
+      - spring.datasource.username=postgres
+      - spring.datasource.password=root
+  user-service:
+    build:
+      context: ./school-micro-user
+      dockerfile: Dockerfile
+    container_name: user-container
+    image: user-image
+    networks:
+      - bored-network
+    depends_on:
+      - eureka-server
+      - userDB
+    restart: always
+    environment:
+
+      - eureka.client.service-url.defaultZone=http://eureka-server:8761/eureka
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.leaseRenewalIntervalInSeconds=10
+      - eureka.instance.leaseExpirationDurationInSeconds=30
+      - spring.data.mongodb.uri=mongodb://userDB:27017/userdatabase
+      - spring.data.mongodb.database=userdatabase
+  event-service:
+    build:
+      context: ./GestionEventsMicroService
+      dockerfile: Dockerfile
+    container_name: event-service-container
+    image: event-service-image
+    restart: always
+    networks:
+      - bored-network
+    depends_on:
+      - eventDB
+      - eureka-server
+    environment:
+      - eureka.client.service-url.defaultZone=http://eureka-server:8761/eureka
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.leaseRenewalIntervalInSeconds=10
+      - eureka.instance.leaseExpirationDurationInSeconds=30
+      - spring.datasource.url=jdbc:mysql://eventdb:3306/event_data_base?createDatabaseIfNotExists=true&autoReconnect=true&allowPublicKeyRetrieval=true&useSSL=false
+      - spring.datasource.username=root
+      - spring.datasource.password=123456
+      - spring.jpa.show-sql=true
+      - spring.jpa.hibernate.ddl-auto=update
+      - spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
+      - spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+  reclamation-service:
+    build:
+      context: ./GestionReclamationMicroservice/
+      dockerfile: Dockerfile
+    container_name: reclamation-container
+    image: reclamation-image
+    restart: always
+    networks:
+      - bored-network
+    depends_on:
+      - reclamationDB
+      - eureka-server
+    environment:
+      - eureka.client.service-url.defaultZone=http://eureka-server:8761/eureka
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.leaseRenewalIntervalInSeconds=10
+      - eureka.instance.leaseExpirationDurationInSeconds=30
+      - spring.datasource.url=jdbc:mysql://reclamationDB:3306/reclamation_data_base?createDatabaseIfNotExists=true&autoReconnect=true&allowPublicKeyRetrieval=true&useSSL=false
+      - spring.datasource.username=root
+      - spring.datasource.password=123456
+      - spring.jpa.show-sql=true
+      - spring.jpa.hibernate.ddl-auto=update
+      - spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
+      - spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+  club-service:
+    build:
+      context: ./club-service
+      dockerfile: Dockerfile
+    container_name: club-container
+    image: club-image
+    restart: always
+    networks:
+      - bored-network
+    depends_on:
+      - eureka-server
+      - clubDB
+    environment:
+      - eureka.client.service-url.defaultZone=http://eureka-server:8761/eureka
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.leaseRenewalIntervalInSeconds=10
+      - eureka.instance.leaseExpirationDurationInSeconds=30
+      - spring.datasource.url=jdbc:postgresql://clubDB:5432/club-service
+      - spring.datasource.username=postgres
+      - spring.datasource.password=root
+  course-service:
+    build:
+      context: ./course-service
+      dockerfile: Dockerfile
+    container_name: course-container
+    image: course-image
+    restart: always
+    networks:
+      - bored-network
+    depends_on:
+      - courseDB
+      - eureka-server
+    environment:
+      - eureka.client.service-url.defaultZone=http://eureka-server:8761/eureka
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.leaseRenewalIntervalInSeconds=10
+      - eureka.instance.leaseExpirationDurationInSeconds=30
+      - spring.data.mongodb.uri=mongodb://courseDB:27017/course
+      - spring.data.mongodb.database=course
+  node-service:
+    build:
+      context: ./node-service
+      dockerfile: Dockerfile
+    container_name: node-container
+    image: node-image
+    restart: always
+    networks:
+      - bored-network
+    depends_on:
+      - eureka-server
+      - nodeDB
+    environment:
+      - EUREKA_HOST=eureka-server
+      - EUREKA_PORT=8761  
+      - DB_URI=mongodb://nodeDB:27017/classDB    
+  api-gateway:
+    build:
+      context: ./cloud-gateway-api
+      dockerfile: Dockerfile
+    container_name: api-gateway-container
+    image: api-gateway-image
+    restart: always
+    networks:
+      - bored-network
+    depends_on:
+      - eureka-server
+      - user-service
+      - event-service
+      - reclamation-service
+      - club-service
+      - course-service
+      - node-service
+      - forum-service
+    ports:
+      - 8051:8051
+    environment:
+      eureka.client.service-url.defaultZone : http://eureka-server:8761/eureka
+      EUREKA_INSTANCE_PREFERIPADDRESS : true
+      EUREKA_INSTANCE_LEASERENEWALINTERVALINSECONDS: 10
+      EUREKA_INSTANCE_LEASEEXPIRATIONDURATIONINSECONDS: 30
+      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: user-service
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://user-service:8060
+      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/api/**
+      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: event-service
+      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://event-service:8090
+      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: Path=/events/**
+      SPRING_CLOUD_GATEWAY_ROUTES_2_ID: reclamation-service
+      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: lb://reclamation
+      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: Path=/reclamations/**
+      SPRING_CLOUD_GATEWAY_ROUTES_3_ID: club-service
+      SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://club-service:9000
+      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: Path=/clubs/**
+      SPRING_CLOUD_GATEWAY_ROUTES_4_ID: course-service
+      SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://course-service:9090
+      SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: Path=/courses/**
+      SPRING_CLOUD_GATEWAY_ROUTES_5_ID: node-service
+      SPRING_CLOUD_GATEWAY_ROUTES_5_URI: http://node-service:5000
+      SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0: Path=/classes/**
+      SPRING_CLOUD_GATEWAY_ROUTES_6_ID: forum-service
+      SPRING_CLOUD_GATEWAY_ROUTES_6_URI: http://forum-service:8080
+      SPRING_CLOUD_GATEWAY_ROUTES_6_PREDICATES_0: Path=/forums/**
+      
+
+
+
+networks:
+  bored-network:
+    name: bored-network
+volumes:
+  eventVolume:
+  reclamationVolume:
+  userVolume:
+  clubVolume:
+  forumVolume:
+  courseVolume:
+  nodeVolume:
+  
+  

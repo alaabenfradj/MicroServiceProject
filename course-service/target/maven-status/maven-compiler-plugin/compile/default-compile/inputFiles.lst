@@ -1,0 +1,15 @@
+<<<<<<< HEAD
+C:\Users\Alaa\Desktop\5eme Twin\microservices\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\services\CourseService.java
+C:\Users\Alaa\Desktop\5eme Twin\microservices\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\CourseServiceApplication.java
+C:\Users\Alaa\Desktop\5eme Twin\microservices\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\entities\Course.java
+C:\Users\Alaa\Desktop\5eme Twin\microservices\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\services\ICourseService.java
+C:\Users\Alaa\Desktop\5eme Twin\microservices\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\repositories\CourseRepository.java
+C:\Users\Alaa\Desktop\5eme Twin\microservices\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\controllers\CourseController.java
+=======
+D:\micros-service\smart-school-v4\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\CourseServiceApplication.java
+D:\micros-service\smart-school-v4\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\controllers\CourseController.java
+D:\micros-service\smart-school-v4\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\services\CourseService.java
+D:\micros-service\smart-school-v4\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\repositories\CourseRepository.java
+D:\micros-service\smart-school-v4\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\entities\Course.java
+D:\micros-service\smart-school-v4\Micro-Services-SmartSchool\course-service\src\main\java\com\example\courseservice\services\ICourseService.java
+>>>>>>> 73f1cb0532725563cdd5b63e066cd08e0dbd1e1b
