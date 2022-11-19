@@ -1,4 +1,4 @@
-# Micro-Services-SmartSchool
+# Micro-Services-SmartSchool (Academic Project)
 ### Getting Started with Micro Service Architecture :
 In this application we have a total of 9 microServices :
 | MicroService | Description |
